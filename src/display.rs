@@ -43,9 +43,14 @@ impl Display {
                 let x = (x as u32) * SCALE_FACTOR;
                 let y = (y as u32) * SCALE_FACTOR;
 
-                self.canvas.set_draw_color(pixels::Color::RGB(0,col *255,0));
-                let _ = self.canvas
-                    .fill_rect(Rect::new(x as i32, y as i32, SCALE_FACTOR, SCALE_FACTOR));
+                self.canvas
+                    .set_draw_color(pixels::Color::RGB(0, col * 255, 0));
+                let _ = self.canvas.fill_rect(Rect::new(
+                    x as i32,
+                    y as i32,
+                    SCALE_FACTOR,
+                    SCALE_FACTOR,
+                ));
             }
         }
         self.canvas.present();

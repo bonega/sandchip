@@ -1,93 +1,16 @@
-use rand::prelude::*;
 use crate::{VRAM_HEIGHT, VRAM_WIDTH};
+use rand::prelude::*;
 use std::time::Instant;
-use std::fmt::Pointer;
-use rand::rngs::adapter::ReseedingRng;
 
 const RAM_SIZE: usize = 4096;
 const ROM_START: usize = 0x200;
 
 const FONTS: [u8; 80] = [
-    0xF0,
-    0x90,
-    0x90,
-    0x90,
-    0xF0,
-    0x20,
-    0x60,
-    0x20,
-    0x20,
-    0x70,
-    0xF0,
-    0x10,
-    0xF0,
-    0x80,
-    0xF0,
-    0xF0,
-    0x10,
-    0xF0,
-    0x10,
-    0xF0,
-    0x90,
-    0x90,
-    0xF0,
-    0x10,
-    0x10,
-    0xF0,
-    0x80,
-    0xF0,
-    0x10,
-    0xF0,
-    0xF0,
-    0x80,
-    0xF0,
-    0x90,
-    0xF0,
-    0xF0,
-    0x10,
-    0x20,
-    0x40,
-    0x40,
-    0xF0,
-    0x90,
-    0xF0,
-    0x90,
-    0xF0,
-    0xF0,
-    0x90,
-    0xF0,
-    0x10,
-    0xF0,
-    0xF0,
-    0x90,
-    0xF0,
-    0x90,
-    0x90,
-    0xE0,
-    0x90,
-    0xE0,
-    0x90,
-    0xE0,
-    0xF0,
-    0x80,
-    0x80,
-    0x80,
-    0xF0,
-    0xE0,
-    0x90,
-    0x90,
-    0x90,
-    0xE0,
-    0xF0,
-    0x80,
-    0xF0,
-    0x80,
-    0xF0,
-    0xF0,
-    0x80,
-    0xF0,
-    0x80,
-    0x80,
+    0xF0, 0x90, 0x90, 0x90, 0xF0, 0x20, 0x60, 0x20, 0x20, 0x70, 0xF0, 0x10, 0xF0, 0x80, 0xF0, 0xF0,
+    0x10, 0xF0, 0x10, 0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0, 0x80, 0xF0, 0x10, 0xF0, 0xF0, 0x80,
+    0xF0, 0x90, 0xF0, 0xF0, 0x10, 0x20, 0x40, 0x40, 0xF0, 0x90, 0xF0, 0x90, 0xF0, 0xF0, 0x90, 0xF0,
+    0x10, 0xF0, 0xF0, 0x90, 0xF0, 0x90, 0x90, 0xE0, 0x90, 0xE0, 0x90, 0xE0, 0xF0, 0x80, 0x80, 0x80,
+    0xF0, 0xE0, 0x90, 0x90, 0x90, 0xE0, 0xF0, 0x80, 0xF0, 0x80, 0xF0, 0xF0, 0x80, 0xF0, 0x80, 0x80,
 ];
 
 struct Timer {
@@ -97,7 +20,10 @@ struct Timer {
 
 impl Timer {
     fn new() -> Self {
-        Timer { value: 0, start_time: Instant::now() }
+        Timer {
+            value: 0,
+            start_time: Instant::now(),
+        }
     }
 
     fn get_value(&mut self) -> u8 {
@@ -134,7 +60,19 @@ impl CPU {
     pub fn new() -> Self {
         let mut ram = [0; RAM_SIZE];
         ram[0..FONTS.len()].copy_from_slice(&FONTS);
-        CPU { v: [0; 16], pc: ROM_START, stack: [0; 16], sp: 0, i: 0, ram, vram: [[0; VRAM_WIDTH]; VRAM_HEIGHT], delay_timer: Timer::new(), sound_timer: 0, keypad: [0; 16], update_screen: true }
+        CPU {
+            v: [0; 16],
+            pc: ROM_START,
+            stack: [0; 16],
+            sp: 0,
+            i: 0,
+            ram,
+            vram: [[0; VRAM_WIDTH]; VRAM_HEIGHT],
+            delay_timer: Timer::new(),
+            sound_timer: 0,
+            keypad: [0; 16],
+            update_screen: true,
+        }
     }
 
     pub fn load_rom(&mut self, data: Vec<u8>) {
@@ -150,7 +88,7 @@ impl CPU {
             ((opcode & 0xF000) >> 12),
             ((opcode & 0x0F00) >> 8),
             ((opcode & 0x00F0) >> 4),
-            (opcode & 0x000F)
+            (opcode & 0x000F),
         );
         let (_, x, y, n) = bytes;
         let nnn = opcode & 0x0FFF;
@@ -190,7 +128,7 @@ impl CPU {
             (0xf, _, 3, 3) => self.opfx33(x),
             (0xf, _, 5, 5) => self.opfx55(x),
             (0xf, _, 6, 5) => self.opfx65(x),
-            _ => println!("no match opcode {:X}", opcode)
+            _ => println!("no match opcode {:X}", opcode),
         }
         self.next();
         //println!("opcode {:X}", opcode);
@@ -375,7 +313,7 @@ impl CPU {
 
     fn opfx0a(&mut self, x: usize) {
         //Wait for a key press, store the value of the key in Vx.
-        self.pc -=2;
+        self.pc -= 2;
         for (k, val) in self.keypad.iter().enumerate() {
             if *val == 0 {
                 self.v[x] = k as u8;
