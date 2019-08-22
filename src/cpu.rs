@@ -52,7 +52,7 @@ pub struct CPU {
     pub vram: [[u8; VRAM_WIDTH]; VRAM_HEIGHT],
     delay_timer: Timer,
     sound_timer: u8,
-    keypad: [u8; 16],
+    pub keypad: [u8; 16],
     pub update_screen: bool,
 }
 
@@ -131,7 +131,6 @@ impl CPU {
             _ => println!("no match opcode {:X}", opcode),
         }
         self.next();
-        //println!("opcode {:X}", opcode);
     }
 
     pub fn tick(&mut self) {
@@ -236,10 +235,11 @@ impl CPU {
         self.v[x] = self.v[x].wrapping_sub(self.v[y]);
     }
 
-    fn op8xy6(&mut self, x: usize, y: usize) {
+    fn op8xy6(&mut self, x: usize, _: usize) {
         //Set Vx = Vy SHR 1.
-        self.v[0xf] = self.v[y] & 1;
-        self.v[x] = self.v[y] >> 1;
+        //Using Vx SHR 1 because of faulty docs.
+        self.v[0xf] = self.v[x] & 1;
+        self.v[x] = self.v[x] >> 1;
     }
 
     fn op8xy7(&mut self, x: usize, y: usize) {
@@ -248,10 +248,11 @@ impl CPU {
         self.v[x] = self.v[y].wrapping_sub(self.v[x]);
     }
 
-    fn op8xye(&mut self, x: usize, y: usize) {
+    fn op8xye(&mut self, x: usize, _: usize) {
         //Set Vx = Vy SHL 1.
-        self.v[0xf] = (self.v[y] >> 7) & 1;
-        self.v[x] = self.v[y] << 1;
+        //Using Vx SHL 1 because of faulty docs.
+        self.v[0xf] = (self.v[x] >> 7) & 1;
+        self.v[x] = self.v[x] << 1;
     }
 
     fn op9xy0(&mut self, x: usize, y: usize) {
@@ -340,26 +341,24 @@ impl CPU {
 
     fn opfx29(&mut self, x: usize) {
         //Set I = location of sprite for digit Vx.
-        self.i = x * 5;
+        self.i = (self.v[x] * 5) as usize;
     }
 
     fn opfx33(&mut self, x: usize) {
         //Store BCD representation of Vx in memory locations I, I+1, and I+2.
-        self.ram[self.i] = self.v[x] >> 2;
-        self.ram[self.i + 1] = self.v[x] >> 1 & 1;
-        self.ram[self.i + 2] = self.v[x] & 1;
+        self.ram[self.i] = self.v[x] / 100;
+        self.ram[self.i + 1] = (self.v[x] % 100) / 10;
+        self.ram[self.i + 2] = self.v[x] % 10;
     }
 
     fn opfx55(&mut self, x: usize) {
         //Store registers V0 through Vx in memory starting at location I.
-        self.ram[self.i..self.i + x].copy_from_slice(&self.v[0..x]);
-        self.i += x + 1;
+        self.ram[self.i..self.i + x + 1].copy_from_slice(&self.v[0..x + 1]);
     }
 
     fn opfx65(&mut self, x: usize) {
         //Read registers V0 through Vx from memory starting at location I.
-        self.v[0..x].copy_from_slice(&self.ram[self.i..self.i + x]);
-        self.i += x + 1;
+        self.v[0..x + 1].copy_from_slice(&self.ram[self.i..self.i + x + 1]);
     }
 }
 
