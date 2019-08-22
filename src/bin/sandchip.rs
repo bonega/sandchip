@@ -2,7 +2,6 @@ use sandchiplib::cpu::CPU;
 use sandchiplib::display::Display;
 use sandchiplib::input;
 use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
 use std::env;
 use std::fs;
 use std::thread;
@@ -12,7 +11,7 @@ const HZ: usize = 400;
 const MS_TARGET: usize = (1000 as f32 / HZ as f32 * OP_BUNDLE_SIZE as f32) as usize;
 
 fn main() {
-    let keymap = input::Input::load();
+    let input = input::Input::load();
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
         println!("Please provide path to a chip8 rom as an argument");
@@ -34,16 +33,12 @@ fn main() {
             match event {
                 Event::Quit { .. } => {}
                 Event::KeyDown { keycode, .. } => match keycode {
-                    Some(Keycode::Escape) => std::process::exit(0),
-                    Some(keycode) => match keymap.keymap.get(&keycode) {
-                        Some(&i) => cpu.keypad[i] = 1,
-                        _ => continue,
-                    },
+                    Some(k) => input.handle_key_down(&k, &mut cpu),
                     None => continue,
                 },
-                Event::KeyUp { keycode, .. } => match keymap.keymap.get(&keycode.unwrap()) {
-                    Some(&i) => cpu.keypad[i] = 0,
-                    _ => continue,
+                Event::KeyUp { keycode, .. } => match keycode {
+                    Some(k) => input.handle_key_up(&k, &mut cpu),
+                    None => continue,
                 },
                 _ => continue,
             }
