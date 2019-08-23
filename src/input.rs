@@ -9,7 +9,8 @@ pub struct Input {
 
 impl Input {
     pub fn from_string(string: &str) -> Self {
-        let keymap: Vec<String> = serde_json::from_str(string).unwrap();
+        let keymap: Vec<String> =
+            serde_json::from_str(string).expect("Parsing keymap from json failed");
         let mut keycodemap = HashMap::new();
         for (i, v) in keymap.iter().enumerate() {
             keycodemap.insert(Keycode::from_name(v).unwrap(), i);
@@ -18,7 +19,7 @@ impl Input {
     }
 
     pub fn load() -> Self {
-        let data = fs::read_to_string("keymap.json").unwrap();
+        let data = fs::read_to_string("keymap.json").expect("Failed to open keymap.json");
         Input::from_string(&data)
     }
 
