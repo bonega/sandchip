@@ -1,4 +1,3 @@
-use sdl2;
 use sdl2::pixels;
 use sdl2::rect::Rect;
 use sdl2::render::Canvas;
@@ -18,11 +17,7 @@ impl Display {
     pub fn new(sdl_context: &sdl2::Sdl) -> Self {
         let video_subsys = sdl_context.video().unwrap();
         let window = video_subsys
-            .window(
-                "rust-sdl2_gfx: draw line & FPSManager",
-                SCREEN_WIDTH,
-                SCREEN_HEIGHT,
-            )
+            .window("Sandchip", SCREEN_WIDTH, SCREEN_HEIGHT)
             .position_centered()
             .opengl()
             .build()
@@ -34,7 +29,7 @@ impl Display {
         canvas.clear();
         canvas.present();
 
-        Display { canvas: canvas }
+        Display { canvas }
     }
 
     pub fn draw(&mut self, pixels: &[[u8; VRAM_WIDTH]; VRAM_HEIGHT]) {

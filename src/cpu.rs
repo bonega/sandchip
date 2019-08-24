@@ -75,8 +75,8 @@ impl CPU {
         }
     }
 
-    pub fn load_rom(&mut self, data: Vec<u8>) {
-        self.ram[ROM_START..ROM_START + data.len()].copy_from_slice(&data);
+    pub fn load_rom(&mut self, data: &Vec<u8>) {
+        self.ram[ROM_START..ROM_START + data.len()].copy_from_slice(data);
     }
 
     fn get_opcode(&self) -> usize {
@@ -84,16 +84,16 @@ impl CPU {
     }
 
     fn run_opcode(&mut self, opcode: usize) {
-        let bytes = (
+        let nibbles = (
             ((opcode & 0xF000) >> 12),
             ((opcode & 0x0F00) >> 8),
             ((opcode & 0x00F0) >> 4),
             (opcode & 0x000F),
         );
-        let (_, x, y, n) = bytes;
+        let (_, x, y, n) = nibbles;
         let nnn = opcode & 0x0FFF;
         let kk = opcode as u8;
-        match bytes {
+        match nibbles {
             (0, 0, 0xe, 0) => self.op00e0(),
             (0, 0, 0xe, 0xe) => self.op00ee(),
             (0x1, _, _, _) => self.op1nnn(nnn),

@@ -2,9 +2,7 @@ use sandchiplib::cpu::CPU;
 use sandchiplib::display::Display;
 use sandchiplib::input;
 use sdl2::event::Event;
-use std::env;
-use std::fs;
-use std::thread;
+use std::{env, fs, thread};
 
 const OP_BUNDLE_SIZE: usize = 5;
 const HZ: usize = 400;
@@ -23,7 +21,7 @@ fn main() {
         std::process::exit(1);
     });
     let mut cpu = CPU::new();
-    cpu.load_rom(data);
+    cpu.load_rom(&data);
     let sdl_context = sdl2::init().unwrap();
     let mut display = Display::new(&sdl_context);
     let mut event_pump = sdl_context.event_pump().unwrap();
@@ -33,11 +31,11 @@ fn main() {
             match event {
                 Event::Quit { .. } => {}
                 Event::KeyDown { keycode, .. } => match keycode {
-                    Some(k) => input.handle_key_down(&k, &mut cpu),
+                    Some(k) => input.handle_key_down(k, &mut cpu),
                     None => continue,
                 },
                 Event::KeyUp { keycode, .. } => match keycode {
-                    Some(k) => input.handle_key_up(&k, &mut cpu),
+                    Some(k) => input.handle_key_up(k, &mut cpu),
                     None => continue,
                 },
                 _ => continue,
